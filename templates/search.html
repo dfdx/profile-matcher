@@ -1,5 +1,9 @@
 {% extends "layout.html" %}
 {% block body %}
-  <input type="text" placeholder="LinkedIn URL" size="50"/>
-  <button type="button"/>Search</button>
+  <p>Found {{ model.count }} results</p>
+  <ul>
+  {% for p in model.persons %}
+  <li><a href="https://vk.com/id{{ p.uid }}" target="blank">{{ p.first_name }} {{ p.last_name }}</a></li>
+  {% endfor %}
+  </ul>
 {% endblock %}

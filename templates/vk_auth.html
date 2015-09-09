@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% block body %}
+  <a href="https://oauth.vk.com/authorize?client_id={{ app_id }}&redirect_uri={{ redirect_uri }}&display=popup&response_type=token&revoke=1" class="btn btn-default"/>Get VK token</a>
+
+  <script type="text/javascript">
+    window.onload = function() {
+      var hash = window.location.hash.substr(1);
+      if (hash.length > 0) {
+        params = {};
+        hash.split('&').forEach(function(p, ix, ps) {
+          var s = p.split('=');
+          params[s[0]] = s[1];
+        });
+        expiresIn = new Date(Date.now() + params.expires_in * 1000).toUTCString();
+        document.cookie = "vk_token=" + params.access_token + "; expires=" + expiresIn /*+"; secure=true;"*/;
+        document.cookie = "vk_user_id=" + params.user_id + "; expires=" + expiresIn/* +"; secure=true;"*/;
+        window.location = "/";
+      }
+    }
+  </script>
+{% endblock %}
