@@ -1,7 +1,65 @@
 {% extends "layout.html" %}
 {% block body %}
-  <form action="search">
-    <input type="text" name="q" placeholder="LinkedIn URL" size="50"/>
-    <button type="submit" class="btn btn-default">Search</button>
-  </form>
+  <div id="vk_api_transport"></div>
+  <script type="text/javascript">
+    window.vkAsyncInit = function() {
+      VK.init({
+        apiId: {{ vk_app_id }}
+      });
+      VK.Auth.getLoginStatus(authInfo);
+    };
+    function authInfo(response) {
+      if (response.session) {
+        // alert('user: '+response.session.mid);
+        $('#loginVk').hide();
+        $('#searchDiv').show();
+      } else {
+        $('#loginVk').show();
+        $('#searchDiv').hide();
+      }
+    }
+    function search() {
+      var tbody = $("#resultsTable").find('tbody');
+      tbody.empty();
+      VK.api('users.search', {'q': $('#q').val()}, function cb(apiResponse) {
+        if (apiResponse.response) {
+          var persons = apiResponse.response;          
+          persons.forEach(function(person) {
+            tbody.append($('<tr>')
+              .append($('<td>').text(person.uid))
+              .append($('<td>').text(person.first_name))
+              .append($('<td>').text(person.last_name))
+            );
+          });
+        } else {
+          alert(JSON.stringify(apiResponse));
+        }
+      });
+    }
+
+    setTimeout(function() {
+      var el = document.createElement("script");
+      el.type = "text/javascript";
+      el.src = "//vk.com/js/api/openapi.js";
+      el.async = true;
+      document.getElementById("vk_api_transport").appendChild(el);
+    }, 0);
+  </script>
+
+  <main id="main" class="col-md-4 col-md-offset-4">
+    <button id="loginVk" type="button" class="btn btn-default" onclick="VK.Auth.login(authInfo);" size="50">Login to VK</button>
+    <div id="searchDiv">
+      <div class="input-group">
+        <input id="q" type="text" name="q" class="form-control" placeholder="LinkedIn profile URL"/>
+        <span class="input-group-btn">
+          <button class="btn btn-default" type="button" onClick="search()">Search</button>
+        </span>
+      </div>
+      <p id="searchResults">
+        <table id="resultsTable" class="table">
+          <tbody></tbody>
+        </table>
+      </p>
+    </div>
+  </main>
 {% endblock %}
